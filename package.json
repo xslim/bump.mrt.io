@@ -1,0 +1,20 @@
+{
+  "name": "adyen-merchant",
+  "author": "xslim",
+  "description": "Adyen merchant test server",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.coffee"
+  },
+  "main": "app.coffee",
+  "dependencies": {
+    "body-parser": "^1.9.0",
+    "express": "*",
+    "hiredis": "*",
+    "redis": "*"
+  },
+  "engines": {
+    "node": "*"
+  }
+}
