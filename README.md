@@ -5,14 +5,14 @@ NodeJS Server for Bump integration
 
 ### POST a bump data
 POST `/bump/:channel/:time/:location?`, where 
-- `channel` is a "room"
-- `time` is in seconds
+- `channel` is a "virtual room" (for bump separation)
+- `time` is Unix timestamp, in seconds
 - `location` is optional, as `lat,lon`
 
 Responce: `id` of bump
 
 Example:
-`curl -X POST -d "test_data" http://bump.mrt.io/bump/test/1414542826` 
+`curl -X POST -d "MID|US|USD|4.55#MD5" http://bump.mrt.io/bump/test/1414542826` 
 
 ### GET a data
 POST `/bump/:channel/:time/` or GET `/bump/:channel/:id`
