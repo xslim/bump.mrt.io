@@ -1,7 +1,7 @@
 {
-  "name": "adyen-merchant",
+  "name": "bump",
   "author": "xslim",
-  "description": "Adyen merchant test server",
+  "description": "Bumping test server",
   "version": "0.0.1",
   "private": true,
   "scripts": {
