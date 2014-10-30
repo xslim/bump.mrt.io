@@ -3,9 +3,9 @@ router = express.Router()
 
 router.get '/', (req, res) ->
 
-  redis.mget ["total_bumps", "total_bumps_matched"], (err, data) ->
-    console.log(data)
-    if data and data.length > 1
+  what = ["bumps:counter:total", "bumps:counter:matched", "bumps:counter:miss"]
+  redis.mget what, (err, data) ->
+    if data and data.length > 2
       res.send "" + data[0] + " / " + data[1]
     else
       res.end "K"
