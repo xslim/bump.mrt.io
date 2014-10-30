@@ -45,18 +45,17 @@ data_or_id = (channel, time, location, data, callback) ->
       db_store channel, time, location, data, (err, db_id) ->
         callback(db_id)
     else
+      db_miss channel
       callback(null)
 
 db_find_by_id = (channel, id, callback) ->
-  bump_counter = "bump:"+channel+":"
-
-  b_id = bump_counter+id
+  b_id =  "bump:"+channel+":"+id
   redis.hget b_id, "data", (err, data) ->
     callback(err, data)
 
 
 db_find = (channel, time, location, data, callback) ->
-  bumps_time = "bumps:"+channel
+  bumps_time = "bumps:time:"+channel
   ti1 = time - 10
   ti2 = time + 10
 
@@ -81,8 +80,9 @@ db_find = (channel, time, location, data, callback) ->
 db_matched = (channel, id, data, callback) ->
   # console.log "db_matched ", id
 
-  bump_counter = "bump:"+channel+":"
-  bumps_time = "bumps:"+channel
+  bump_prefix = "bump:"+channel+":"
+  bumps_counter = "bumps:counter:"+channel
+  bumps_time = "bumps:time:"+channel
 
   hasData = (if (data) then true else false)
 
@@ -96,18 +96,19 @@ db_matched = (channel, id, data, callback) ->
   # multi.zrem(bumps_time, id)
 
   time_m = Date.now() / 1000
-  multi.hset(bump_counter+id, "matched", time_m)
+  multi.incr "bumps:counter:matched"
+  multi.hset(bump_prefix+id, "matched", time_m)
 
   if hasData
     # console.log "hset data", data
-    multi.hset(bump_counter+id, "data", data)
+    multi.hset(bump_prefix+id, "data", data)
 
   multi.exec (err, e_data) ->
     # console.log "exec "
     if hasData
       callback err, id
     else
-      b_id = bump_counter+id
+      b_id = bump_prefix+id
       # console.log "hget ", b_id
       redis.hget b_id, "data", (err, d) ->
         # console.log "e,d ", err, d
@@ -119,17 +120,19 @@ db_store = (channel, time, location, data, callback) ->
     location: location
     data: data
 
-  bump_counter = "bump:"+channel+":"
-  bumps_time = "bumps:"+channel
+  bump_prefix = "bump:"+channel+":"
+  bumps_counter = "bumps:counter:"+channel
+  bumps_time = "bumps:time:"+channel
 
   # Counter
-  redis.incr bump_counter+"id", (err, bump_id) ->
+  redis.incr "bumps:counter:total"
+  redis.incr bumps_counter, (err, bump_id) ->
     # console.log "bump_id = ", bump_id
 
     multi = redis.multi()
 
     # set hash
-    multi.hmset bump_counter + bump_id, item
+    multi.hmset bump_prefix + bump_id, item
 
     # set ordered set
     # console.log "zadd ", bumps_time, time, bump_id
@@ -137,5 +140,9 @@ db_store = (channel, time, location, data, callback) ->
     multi.exec (err, data) ->
       callback err, String(bump_id)
 
+
+db_miss = (channel) ->
+  redis.incr "bumps:counter:miss"
+  redis.incr "bumps:counter:"+channel+":miss"
 
 module.exports = router

@@ -7,7 +7,8 @@ router.get "/flushdb", (req, res) ->
     res.writeHead 200, "Content-Type": "text/plain"
     res.end (data || err)
 
-router.get "/keys", (req, res) ->
+router.get "/keys/:what?", (req, res) ->
+  what = req.params.what
 
   rhgetall = (key, callback) ->
     setTimeout (->
@@ -17,8 +18,13 @@ router.get "/keys", (req, res) ->
         callback null, h
     ), 500
 
-  redis.keys '*', (err, keys) ->
-    res.send keys
+  if what
+    what += "*"
+  else
+    what = "*"
+
+  redis.keys what, (err, data) ->
+    res.send data.join("<br>")
 
     # async.map keys, rhgetall, (err, result) ->
       # res.end JSON.stringify(result)
