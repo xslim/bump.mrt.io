@@ -6,7 +6,7 @@ router.get '/', (req, res) ->
   what = ["bumps:counter:total", "bumps:counter:matched", "bumps:counter:miss"]
   redis.mget what, (err, data) ->
     if data and data.length > 2
-      res.send "" + data[0] + " / " + data[1]
+      res.send "" + data[0] + " / " + data[1] + " / " + data[2]
     else
       res.end "K"
 
